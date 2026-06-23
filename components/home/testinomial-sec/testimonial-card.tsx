@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
@@ -14,6 +15,28 @@ interface TestimonialCardProps {
 }
 
 export default function TestimonialCard({ name, role, testimonial, rating, imageSrc }: TestimonialCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const [canExpand, setCanExpand] = useState(false)
+  const textRef = useRef<HTMLParagraphElement | null>(null)
+
+  useEffect(() => {
+    if (expanded) return
+
+    const element = textRef.current
+    if (!element) return
+
+    const updateOverflowState = () => {
+      setCanExpand(element.scrollHeight > element.clientHeight + 1)
+    }
+
+    updateOverflowState()
+
+    const resizeObserver = new ResizeObserver(updateOverflowState)
+    resizeObserver.observe(element)
+
+    return () => resizeObserver.disconnect()
+  }, [testimonial, expanded])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.96 }}
@@ -27,7 +50,11 @@ export default function TestimonialCard({ name, role, testimonial, rating, image
       viewport={{ once: true }}
       className="h-full w-full flex"
     >
-      <Card className="h-full w-full flex flex-col justify-between bg-white/70 dark:bg-black/40 backdrop-blur-md border border-primary/10 shadow-lg transition-all duration-200 hover:shadow-2xl hover:bg-primary/10 rounded-2xl min-h-[320px] max-h-[380px]">
+      <Card
+        className={`h-full w-full flex flex-col justify-between bg-white/70 dark:bg-black/40 backdrop-blur-md border border-primary/10 shadow-lg transition-all duration-200 hover:shadow-2xl hover:bg-primary/10 rounded-2xl min-h-[320px] ${
+          expanded ? "max-h-none overflow-visible" : "max-h-[380px] overflow-hidden"
+        }`}
+      >
         <CardHeader className="pb-2">
           <div className="flex items-center gap-4">
             <motion.div
@@ -46,9 +73,37 @@ export default function TestimonialCard({ name, role, testimonial, rating, image
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-grow flex items-center justify-center">
-          <p className="italic text-center text-base px-2">"{testimonial}"</p>
+
+        <CardContent className={`flex-grow flex flex-col items-center gap-3 ${expanded ? "justify-start" : "justify-center"}`}>
+          <div className="w-full">
+            <p
+              ref={textRef}
+              className={`italic text-center text-base px-2 text-pretty break-words transition-all duration-300 ${expanded ? "whitespace-normal" : "overflow-hidden"}`}
+              style={
+                expanded
+                  ? { display: "block" }
+                  : {
+                      display: "-webkit-box",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 4
+                    }
+              }
+            >
+              "{testimonial}"
+            </p>
+          </div>
+
+          {canExpand && (
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {expanded ? "See less" : "See more"}
+            </button>
+          )}
         </CardContent>
+
         <CardFooter className="pt-2 flex justify-center">
           <div className="flex">
             {[...Array(5)].map((_, i) => (
