@@ -10,7 +10,7 @@ interface GalleryImage {
   id: string
   src: string
   alt: string
-  media_type: 'image' | 'video'
+  media_type: "image" | "video"
 }
 
 export default function GalleryPage() {
@@ -22,19 +22,38 @@ export default function GalleryPage() {
     async function fetchMedia() {
       try {
         const { data } = await supabase
-          .from('gallery_images')
-          .select('*')
-          .order('created_at', { ascending: false })
+          .from("gallery_images")
+          .select("*")
+          .order("created_at", { ascending: false })
 
         setMedia(data || [])
       } catch (error) {
-        console.error('Error fetching media:', error)
+        console.error("Error fetching media:", error)
       } finally {
         setLoading(false)
       }
     }
 
     fetchMedia()
+  }, [])
+
+  useEffect(() => {
+    const handleVideoPlay = (event: Event) => {
+      const currentVideo = event.target as HTMLVideoElement | null
+      if (!currentVideo) return
+
+      document.querySelectorAll("video").forEach((video) => {
+        if (video !== currentVideo && !video.paused) {
+          video.pause()
+        }
+      })
+    }
+
+    document.addEventListener("play", handleVideoPlay, true)
+
+    return () => {
+      document.removeEventListener("play", handleVideoPlay, true)
+    }
   }, [])
 
   if (loading) {
@@ -49,21 +68,22 @@ export default function GalleryPage() {
     <div className="min-h-screen py-16 md:py-24">
       <div className="container mx-auto px-4">
         <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
-  className="text-center max-w-3xl mx-auto mb-16"
->
-  <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent drop-shadow-lg">
-    Our Gallery
-  </h1>
-  <p className="text-xl md:text-2xl font-medium mb-3 text-primary/90">
-    Experience the moments we’ve captured and the events we’ve transformed.
-  </p>
-  <p className="text-lg text-muted-foreground">
-    Browse through our curated collection of <span className="text-primary font-semibold">photos</span> and <span className="text-primary font-semibold">videos</span> that showcase our passion and creativity.
-  </p>
-</motion.div>
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center max-w-3xl mx-auto mb-16"
+        >
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent drop-shadow-lg">
+            Our Gallery
+          </h1>
+          <p className="text-xl md:text-2xl font-medium mb-3 text-primary/90">
+            Experience the moments we’ve captured and the events we’ve transformed.
+          </p>
+          <p className="text-lg text-muted-foreground">
+            Browse through our curated collection of <span className="text-primary font-semibold">photos</span> and{" "}
+            <span className="text-primary font-semibold">videos</span> that showcase our passion and creativity.
+          </p>
+        </motion.div>
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="flex justify-center gap-2 mb-8">
@@ -80,17 +100,17 @@ export default function GalleryPage() {
             </TabsTrigger>
           </TabsList>
 
-        <TabsContent value="all">
-          <GalleryGrid images={media} mode="all" />
-        </TabsContent>
+          <TabsContent value="all">
+            <GalleryGrid images={media} mode="all" />
+          </TabsContent>
 
-        <TabsContent value="image">
-          <GalleryGrid images={media.filter(item => item.media_type === 'image')} mode="image" />
-        </TabsContent>
+          <TabsContent value="image">
+            <GalleryGrid images={media.filter((item) => item.media_type === "image")} mode="image" />
+          </TabsContent>
 
-        <TabsContent value="video">
-          <GalleryGrid images={media.filter(item => item.media_type === 'video')} mode="video" />
-        </TabsContent>
+          <TabsContent value="video">
+            <GalleryGrid images={media.filter((item) => item.media_type === "video")} mode="video" />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
