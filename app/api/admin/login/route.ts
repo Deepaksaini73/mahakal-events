@@ -4,8 +4,8 @@ import { sign } from 'jsonwebtoken'
 
 export const runtime = 'nodejs'
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'deepak'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'deepak123'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function POST(request: Request) {
